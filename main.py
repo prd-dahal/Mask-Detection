@@ -4,13 +4,13 @@ import datetime
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import model_from_json
+from PIL import Image
+from face_detection import FaceDetection
 
-def preprocessing(image_path):
-    image = tf.keras.preprocessing.image.load_img(
-    image_path, grayscale=False, color_mode="rgb", target_size=(224,224), interpolation="nearest"
-    )
-    arr = input_arr = tf.keras.preprocessing.image.img_to_array(image)
-    arr = np.array(arr)
+def preprocessing(image):
+
+    resized_image = image.resize((224,224))          
+    arr = np.array(resized_image)
     arr = np.expand_dims(arr, axis=0)  
     return arr
     
@@ -19,7 +19,7 @@ def preprocessing(image_path):
 #json_file.close()
 
 
-loaded_model = load_model('saved_models\\mask_detector.model')
+loaded_model = load_model('saved_models/mask_detector.model')
 
 # load weights
 
@@ -28,12 +28,14 @@ loaded_model = load_model('saved_models\\mask_detector.model')
 print("Loaded Model From the Disk")
 
 
-image = preprocessing('Examples\\test_example1.jpg')
-mask_image = preprocessing('Examples\\example_01.png')
-non_mask_image = preprocessing('Examples\\example_02.png')
+mask_image_face_object =  FaceDetection('Examples/example_01.png')
+non_mask_image_face_object = FaceDetection('Examples/example_02.png')
+
+mask_image = preprocessing(mask_image_face_object.detect_face())
+non_mask_image = preprocessing(non_mask_image_face_object.detect_face())
 
 print("The prediction for mask_image is {}".format(loaded_model.predict(mask_image)))
 print("The prediction for non_mask_image is {}".format(loaded_model.predict(non_mask_image)))
-print("The prediction for example_mask_image is {}".format(loaded_model.predict(image)))
+#print("The prediction for example_mask_image is {}".format(loaded_model.predict(image)))
 
 
